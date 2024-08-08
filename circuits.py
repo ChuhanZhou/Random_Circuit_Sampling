@@ -77,6 +77,8 @@ def get_random_circuit(input_n=3,gate_n=10):
     g_list = gates.gate_list
     g_weighted_list = []
     for t_i in range(len(g_list)):
+        if t_i>=input_n:
+            break
         t_len = (t_i+1)*len(g_list[t_i])
         for t_len_i in range(t_len):
             g_weighted_list.append(t_i)
