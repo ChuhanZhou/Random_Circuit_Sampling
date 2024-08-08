@@ -7,17 +7,18 @@ class  Circuit():
     # ex: [cnot,[contral_qubit_i,target_qubit_i]
     def __init__(self,input_n=0,gate_plan = []):
         #super().__init__()
-        blue_print, gate_list = self.create_blue_print(input_n,gate_plan)
-        self.circuit_matrix = self.create_circuit_matrix(blue_print, gate_list)
+        self.gate_plan = gate_plan
+        self.blue_print, self.gate_list = self.create_blue_print(input_n,gate_plan)
+        self.circuit_matrix = self.create_circuit_matrix(self.blue_print, self.gate_list)
 
     # input_list=[q0,q1,q2,...,qn]
     # ex: [0,1,1,0,1]
-    def forward(self,input_list=[]):
-        qubit_matrix = 1
-        for q_type in input_list:
-            qubit = qubits.get_basic(int(q_type))
-            qubit_matrix = np.kron(qubit_matrix, qubit)
+    def run(self,input_list=[]):
+        qubit_matrix = qubits.get_qubit_matrix(input_list)
         out = np.dot(self.circuit_matrix,qubit_matrix)
+        #normalization => <ψ|ψ>=1
+        s = (np.abs(out)**2).sum()
+        out = out/np.sqrt(s)
         return out
 
     def create_blue_print(self,input_n=0,gate_plan=[]):
@@ -71,4 +72,24 @@ class  Circuit():
             circuit_matrix = np.dot(step_matrix,circuit_matrix)
         return circuit_matrix
 
-
+def get_random_circuit(input_n=3,gate_n=10):
+    gate_plan = []
+    g_list = gates.gate_list
+    g_weighted_list = []
+    for t_i in range(len(g_list)):
+        t_len = (t_i+1)*len(g_list[t_i])
+        for t_len_i in range(t_len):
+            g_weighted_list.append(t_i)
+    g_list_weighting = np.array(g_weighted_list)
+    for g_i in range(gate_n):
+        g_type = np.random.choice(g_list_weighting)
+        g_name = g_list[g_type][np.random.randint(0,len(g_list[g_type]))]
+        g_indexs = []
+        g_index_old = -1
+        for index_i in range(g_type+1):
+            g_index_old = np.random.randint(g_index_old+1,input_n-g_type+index_i)
+            g_indexs.append(g_index_old)#(input_n-(g_type+1)+1)
+        if bool(np.random.randint(0,2)):
+            g_indexs.reverse()
+        gate_plan.append([g_name,g_indexs])
+    return Circuit(input_n,gate_plan)

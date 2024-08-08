@@ -3,6 +3,10 @@ import math
 import numpy as np
 import qubits
 
+gate_list = [
+    ["I","H","X","Y","Z","S","T"],
+    ["CNOT","CZ"],
+    ["CCNOT"]]
 
 def get_gate_by_name(name="", is_inverse=False,inner_gates=[]):
     if name == "I" or name == "identity":

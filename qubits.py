@@ -7,6 +7,13 @@ def get_basic(type=0):
         return get_basic_qubit_0()
     return get_basic_qubit_1()
 
+def get_qubit_matrix(input_list=[]):
+    qubit_matrix = 1
+    for q_type in input_list:
+        qubit = get_basic(int(q_type))
+        qubit_matrix = np.kron(qubit_matrix, qubit)
+    return qubit_matrix
+
 def get_basic_qubit_0():# ∣0⟩
     return np.array([[1], [0]])
 
