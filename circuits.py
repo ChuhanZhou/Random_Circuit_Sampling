@@ -16,6 +16,8 @@ class  Circuit():
     # input_list=[q0,q1,q2,...,qn]
     # ex: [0,1,1,0,1]
     def run(self,input_list=[]):
+        """
+        """
         qubit_matrix = qubits.get_qubit_matrix(input_list)
         out = np.dot(self.circuit_matrix,qubit_matrix)
         #normalization => <ψ|ψ>=1
@@ -120,9 +122,17 @@ def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
     print("(2 circuits per batch) avg_batch_running_time[hh:mm:ss]: {}".format((end_time-start_time)/batch_n))
     return f_list
 
-#show P(F)
 def show_p_f(f_list=[],input_n = "N/A",gate_max_n = "N/A",batch_n = "N/A"):
-    plt.xticks(np.arange(0.0, 1.1, 0.1))
-    plt.hist(f_list, rwidth=0.5, align="left", bins=np.arange(0.0, 1.1, 0.05))
+    plt.xticks(np.arange(-0.1, 1.1, 0.1))
+    plt.hist(f_list, rwidth=0.75, align="left", bins=np.arange(-0.1, 1.1, 0.01))
     plt.title("qubit_num:{}|batch_num:{}|gate_max_num:{}".format(input_n, batch_n, gate_max_n))
     plt.show()
+    return plt
+
+def show_p_haar_f(input_n = 1):
+    f = np.linspace(0, 1, 1000)
+    N = 2 ** input_n
+    a = plt.plot(f, (N - 1) * (1 - f) ** (N - 2))
+    plt.title("qubit_num:{}|Hilbert_space_dim:{}".format(input_n, N))
+    plt.show()
+    return a
