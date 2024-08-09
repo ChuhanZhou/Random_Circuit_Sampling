@@ -127,7 +127,6 @@ def show_p_f(f_list=[],input_n = "N/A",gate_max_n = "N/A",batch_n = "N/A"):
     plt.hist(f_list, rwidth=0.75, align="left", bins=np.arange(-0.1, 1.1, 0.01))
     plt.title("qubit_num:{}|batch_num:{}|gate_max_num:{}".format(input_n, batch_n, gate_max_n))
     plt.show()
-    return plt
 
 def show_p_haar_f(input_n = 1):
     f = np.linspace(0, 1, 1000)
@@ -135,4 +134,3 @@ def show_p_haar_f(input_n = 1):
     a = plt.plot(f, (N - 1) * (1 - f) ** (N - 2))
     plt.title("qubit_num:{}|Hilbert_space_dim:{}".format(input_n, N))
     plt.show()
-    return a

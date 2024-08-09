@@ -4,6 +4,8 @@ import qubits
 import circuits
 from matplotlib import pyplot as plt
 import datetime
+import ipywidgets as widgets
+from ipywidgets import interact
 
 if __name__ == '__main__':
     input_qubit_number = 1
