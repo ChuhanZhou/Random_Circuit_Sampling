@@ -2,6 +2,7 @@ import numpy as np
 import gates
 import qubits
 from matplotlib import pyplot as plt
+import datetime
 
 class  Circuit():
     # gate_plan(each gate):[gate_name,[gate_indexs...]]
@@ -104,6 +105,7 @@ def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
         basic_qubit_list.append(0)
 
     f_list = []
+    start_time = datetime.datetime.now()
     for f_i in range(batch_n):
         circuit_0 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
         circuit_1 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
@@ -113,7 +115,9 @@ def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
         f = abs(np.dot(result_0.T, result_1)) ** 2
         f_list.append(f[0, 0])
         if (f_i + 1) % (batch_n / 10) == 0:
-            print("{}|{}".format(batch_n, f_i + 1))
+            print("[{}] {}|{}".format(datetime.datetime.now(),batch_n, f_i + 1))
+    end_time = datetime.datetime.now()
+    print("(2 circuits per batch) avg_batch_running_time[hh:mm:ss]: {}".format((end_time-start_time)/batch_n))
     return f_list
 
 #show P(F)
