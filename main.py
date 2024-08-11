@@ -8,9 +8,9 @@ import ipywidgets as widgets
 from ipywidgets import interact
 
 if __name__ == '__main__':
-    input_qubit_number = 4
-    max_gate_number = 100
-    batch_calculation_number = 1000
+    input_qubit_number = 2
+    max_gate_number = 1000
+    batch_calculation_number = 10000
 
     f_list = circuits.rcs_multi_thread(input_qubit_number, max_gate_number, batch_calculation_number,28)
     # show P(F)
