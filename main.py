@@ -8,11 +8,11 @@ import ipywidgets as widgets
 from ipywidgets import interact
 
 if __name__ == '__main__':
-    input_qubit_number = 1
-    max_gate_number = 10
-    batch_calculation_number = 100
+    input_qubit_number = 4
+    max_gate_number = 100
+    batch_calculation_number = 1000
 
-    f_list = circuits.rcs(input_qubit_number, max_gate_number, batch_calculation_number)
+    f_list = circuits.rcs_multi_thread(input_qubit_number, max_gate_number, batch_calculation_number,28)
     # show P(F)
     circuits.show_p_f(f_list, input_qubit_number, max_gate_number, batch_calculation_number)
     # show P_Haar(F)

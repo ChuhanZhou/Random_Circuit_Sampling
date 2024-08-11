@@ -3,9 +3,6 @@ import gates
 import qubits
 from matplotlib import pyplot as plt
 import datetime
-import math
-from concurrent.futures import ThreadPoolExecutor,wait, ALL_COMPLETED
-from multiprocessing import Pool,Queue,Manager,Process
 
 class  Circuit():
     # gate_plan(each gate):[gate_name,[gate_indexs...]]
@@ -125,70 +122,15 @@ def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
     print("(2 circuits per batch) avg_batch_running_time[hh:mm:ss]: {}".format((end_time-start_time)/batch_n))
     return f_list
 
-def rcs_multi_thread(input_n = 3,gate_max_n = 15,batch_n = 1000,thread_n=8,safe_print=False):
-    thread_n = min(thread_n,batch_n)
-    basic_qubit_list = []
-    for i in range(input_n):
-        basic_qubit_list.append(0)
-    f_list = []
-    task_manager = Manager()
-    f_queue = task_manager.Queue(batch_n)
-    p_queue = task_manager.Queue(thread_n*5)
-
-    start_time = datetime.datetime.now()
-    print("[{}] thread_number: {}".format(start_time,thread_n))
-    batch_submit_total = 0
-    task_list = []
-    for i in range(thread_n):
-        if i is not thread_n-1:
-            submit_n = int(batch_n/thread_n)
-        else:
-            submit_n = batch_n-batch_submit_total
-        task = Process(target=get_fidelities, args=[submit_n,basic_qubit_list,batch_n,gate_max_n,f_queue,p_queue])
-        task.start()
-        task_list.append(task)
-        batch_submit_total += submit_n
-
-    for task in task_list:
-        task.join()
-        task.close()
-
-    if safe_print:
-        for p_i in range(p_queue.qsize()):
-            print(p_queue.get())
-
-    for f_i in range(f_queue.qsize()):
-        f_list.append(f_queue.get())
-    end_time = datetime.datetime.now()
-    print("[{}] (2 circuits per batch) avg_batch_running_time[hh:mm:ss]: {}".format(datetime.datetime.now(),(end_time-start_time)/batch_n))
-    return f_list
-
-#function for multi thread
-def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_max_n,f_q,p_q):
-    for f_i in range(loop_n):
-        circuit_0 = get_random_circuit(len(basic_qubit_list), np.random.randint(1, gate_max_n + 1))
-        circuit_1 = get_random_circuit(len(basic_qubit_list), np.random.randint(1, gate_max_n + 1))
-        result_0 = circuit_0.run(basic_qubit_list)
-        result_1 = circuit_1.run(basic_qubit_list)
-        # fidelity
-        f = abs(np.dot(result_0.T, result_1)) ** 2
-        f_q.put(f[0, 0])
-        finish_n = f_q.qsize()
-        if finish_n % (batch_n / 10) == 0:
-            info = "[{}] {}|{}".format(datetime.datetime.now(), batch_n, finish_n)
-            p_q.put(info)
-            print(info)
-
 def show_p_f(f_list=[],input_n = "N/A",gate_max_n = "N/A",batch_n = "N/A"):
     plt.xticks(np.arange(-0.1, 1.1, 0.1))
-    plt.hist(f_list, rwidth=0.75, align="left", bins=np.arange(-0.1, 1.1, 0.05))
+    plt.hist(f_list, rwidth=0.75, align="left", bins=np.arange(-0.1, 1.1, 0.01))
     plt.title("qubit_num:{}|batch_num:{}|gate_max_num:{}".format(input_n, batch_n, gate_max_n))
     plt.show()
 
 def show_p_haar_f(input_n = 1):
     f = np.linspace(0, 1, 1000)
     N = 2 ** input_n
-    plt.plot(f, (N - 1) * (1 - f) ** (N - 2))
-    plt.xticks(np.arange(-0.1, 1.15, 0.1))
+    a = plt.plot(f, (N - 1) * (1 - f) ** (N - 2))
     plt.title("qubit_num:{}|Hilbert_space_dim:{}".format(input_n, N))
     plt.show()
