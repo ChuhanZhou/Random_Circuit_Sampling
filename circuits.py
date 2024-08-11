@@ -8,18 +8,19 @@ from concurrent.futures import ThreadPoolExecutor,wait, ALL_COMPLETED
 from multiprocessing import Pool,Queue,Manager,Process
 
 class  Circuit():
-    # gate_plan(each gate):[gate_name,[gate_indexs...]]
-    # ex: [cnot,[contral_qubit_i,target_qubit_i]
     def __init__(self,input_n=0,gate_plan = []):
-        #super().__init__()
+        """
+        gate_plan: [[gate_name,[gate_index_0,...]],...]
+            ex: [cnot,[contral_qubit_i,target_qubit_i]
+        """
         self.gate_plan = gate_plan
         self.blue_print, self.gate_list = self.create_blue_print(input_n,gate_plan)
         self.circuit_matrix = self.create_circuit_matrix(self.blue_print, self.gate_list)
 
-    # input_list=[q0,q1,q2,...,qn]
-    # ex: [0,1,1,0,1]
     def run(self,input_list=[]):
         """
+        input_list : [q0,q1,q2,...,qn]
+            ex : [0,1,1,0,1]
         """
         qubit_matrix = qubits.get_qubit_matrix(input_list)
         out = np.dot(self.circuit_matrix,qubit_matrix)
@@ -126,6 +127,9 @@ def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
     return f_list
 
 def rcs_multi_thread(input_n = 3,gate_max_n = 15,batch_n = 1000,thread_n=8,safe_print=False):
+    """
+    safe_print : when using jupyter notebook
+    """
     thread_n = min(thread_n,batch_n)
     basic_qubit_list = []
     for i in range(input_n):
@@ -144,7 +148,7 @@ def rcs_multi_thread(input_n = 3,gate_max_n = 15,batch_n = 1000,thread_n=8,safe_
             submit_n = int(batch_n/thread_n)
         else:
             submit_n = batch_n-batch_submit_total
-        task = Process(target=get_fidelities, args=[submit_n,basic_qubit_list,batch_n,gate_max_n,f_queue,p_queue])
+        task = Process(target=get_fidelities, args=[submit_n,basic_qubit_list,batch_n,gate_max_n,f_queue,p_queue,safe_print])
         task.start()
         task_list.append(task)
         batch_submit_total += submit_n
@@ -164,7 +168,7 @@ def rcs_multi_thread(input_n = 3,gate_max_n = 15,batch_n = 1000,thread_n=8,safe_
     return f_list
 
 #function for multi thread
-def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_max_n,f_q,p_q):
+def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_max_n,f_q,p_q,safe_print=False):
     for f_i in range(loop_n):
         circuit_0 = get_random_circuit(len(basic_qubit_list), np.random.randint(1, gate_max_n + 1))
         circuit_1 = get_random_circuit(len(basic_qubit_list), np.random.randint(1, gate_max_n + 1))
@@ -177,7 +181,8 @@ def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_max_n,f_q,p_q):
         if finish_n % (batch_n / 10) == 0:
             info = "[{}] {}|{}".format(datetime.datetime.now(), batch_n, finish_n)
             p_q.put(info)
-            print(info)
+            if not safe_print:
+                print(info)
 
 def show_p_f(f_list=[],input_n = "N/A",gate_max_n = "N/A",batch_n = "N/A"):
     plt.xticks(np.arange(-0.1, 1.1, 0.1))
