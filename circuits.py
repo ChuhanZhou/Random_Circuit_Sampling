@@ -105,7 +105,7 @@ def get_random_circuit(input_n=3,gate_n=10):
     return Circuit(input_n,gate_plan)
 
 #random_circuit_sampling
-def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
+def rcs(input_n = 3,gate_n = 15,batch_n = 1000):
     basic_qubit_list = []
     for i in range(input_n):
         basic_qubit_list.append(0)
@@ -113,8 +113,10 @@ def rcs(input_n = 3,gate_max_n = 15,batch_n = 1000):
     f_list = []
     start_time = datetime.datetime.now()
     for f_i in range(batch_n):
-        circuit_0 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
-        circuit_1 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
+        #circuit_0 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
+        #circuit_1 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
+        circuit_0 = get_random_circuit(input_n, gate_n)
+        circuit_1 = get_random_circuit(input_n, gate_n)
         result_0 = circuit_0.run(basic_qubit_list)
         result_1 = circuit_1.run(basic_qubit_list)
         # fidelity
@@ -168,10 +170,10 @@ def rcs_multi_thread(input_n = 3,gate_max_n = 15,batch_n = 1000,thread_n=8,safe_
     return f_list
 
 #function for multi thread
-def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_max_n,f_q,p_q,safe_print=False):
+def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_n,f_q,p_q,safe_print=False):
     for f_i in range(loop_n):
-        circuit_0 = get_random_circuit(len(basic_qubit_list), np.random.randint(1, gate_max_n + 1))
-        circuit_1 = get_random_circuit(len(basic_qubit_list), np.random.randint(1, gate_max_n + 1))
+        circuit_0 = get_random_circuit(len(basic_qubit_list), gate_n)
+        circuit_1 = get_random_circuit(len(basic_qubit_list), gate_n)
         result_0 = circuit_0.run(basic_qubit_list)
         result_1 = circuit_1.run(basic_qubit_list)
         # fidelity
@@ -184,16 +186,35 @@ def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_max_n,f_q,p_q,safe_prin
             if not safe_print:
                 print(info)
 
-def show_p_f(f_list=[],input_n = "N/A",gate_max_n = "N/A",batch_n = "N/A"):
-    plt.xticks(np.arange(-0.1, 1.1, 0.1))
-    plt.hist(f_list, rwidth=0.75, align="left", bins=np.arange(-0.1, 1.1, 0.05))
-    plt.title("qubit_num:{}|batch_num:{}|gate_max_num:{}".format(input_n, batch_n, gate_max_n))
+def show_p_f(f_list=[],input_n = None,gate_n = None,batch_n = None):
+    ax = plt.figure().add_subplot()
+    ax.hist(f_list, rwidth=0.75, align="left", bins=np.arange(-0.1, 1.1, 0.05),label="P(F)")
+    ax.set_xlabel("Fidelity")
+    ax.set_ylabel("Batch number")
+    ax.set_xticks(np.arange(-0.1, 1.1, 0.1))
+    ax.set_title("qubit_num:{}|batch_num:{}|gate_num:{}".format(input_n, batch_n, gate_n))
+
+    if input_n is not None and batch_n is not None:
+        line = ax.patches[::len(ax.patches)]
+        label = [p.get_label() for p in ax.patches[::len(ax.patches)]]
+        show_p_haar_f(input_n,[ax,line,label])
     plt.show()
 
-def show_p_haar_f(input_n = 1):
+def show_p_haar_f(input_n = 1, main_info = None):
     f = np.linspace(0, 1, 1000)
     N = 2 ** input_n
-    plt.plot(f, (N - 1) * (1 - f) ** (N - 2))
-    plt.xticks(np.arange(-0.1, 1.15, 0.1))
-    plt.title("qubit_num:{}|Hilbert_space_dim:{}".format(input_n, N))
-    plt.show()
+    if main_info is None:
+        plt.plot(f, (N - 1) * (1 - f) ** (N - 2),label="P_Haar(f)")
+        plt.xticks(np.arange(-0.1, 1.15, 0.1))
+        plt.title("P_Haar(f)|qubit_num:{}|Hilbert_space_dim:{}".format(input_n, N))
+        plt.show()
+    else:
+        ax_0,line_0,label_0 = main_info
+        ax_1 = ax_0.twinx()
+        line_1 = ax_1.plot(f, (N - 1) * (1 - f) ** (N - 2), label="P_Haar(F)",color="tab:orange")
+        ax_1.set_ylim(bottom=0)
+        label_1 = [l.get_label() for l in line_1]
+        lines = line_0+line_1
+        labels = label_0 + label_1
+        ax_0.legend(lines,labels)
+

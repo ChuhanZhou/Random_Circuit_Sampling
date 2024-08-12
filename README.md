@@ -1,7 +1,7 @@
 # Random_Circuit_Sampling
 exercise of random circuit sampling
 
-1.Set the input qubit number, max gate number and batch calculation number in main.py
+1.Set the input qubit number, gate number and batch calculation number in main.py
 
 2.Run main.py
 
