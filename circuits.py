@@ -17,12 +17,7 @@ class  Circuit():
         self.blue_print, self.gate_list = self.create_blue_print(input_n,gate_plan)
         self.circuit_matrix = self.create_circuit_matrix(self.blue_print, self.gate_list)
 
-    def run(self,input_list=[]):
-        """
-        input_list : [q0,q1,q2,...,qn]
-            ex : [0,1,1,0,1]
-        """
-        qubit_matrix = qubits.get_qubit_matrix(input_list)
+    def run(self,qubit_matrix):
         out = np.dot(self.circuit_matrix,qubit_matrix)
         #normalization => <ψ|ψ>=1
         s = (np.abs(out)**2).sum()
@@ -117,8 +112,9 @@ def rcs(input_n = 3,gate_n = 15,batch_n = 1000):
         #circuit_1 = get_random_circuit(input_n, np.random.randint(1, gate_max_n + 1))
         circuit_0 = get_random_circuit(input_n, gate_n)
         circuit_1 = get_random_circuit(input_n, gate_n)
-        result_0 = circuit_0.run(basic_qubit_list)
-        result_1 = circuit_1.run(basic_qubit_list)
+        input_matrix = qubits.get_qubit_matrix(basic_qubit_list)
+        result_0 = circuit_0.run(input_matrix)
+        result_1 = circuit_1.run(input_matrix)
         # fidelity
         f = abs(np.dot(result_0.T, result_1)) ** 2
         f_list.append(f[0, 0])
@@ -174,8 +170,9 @@ def get_fidelities (loop_n,basic_qubit_list,batch_n,gate_n,f_q,p_q,safe_print=Fa
     for f_i in range(loop_n):
         circuit_0 = get_random_circuit(len(basic_qubit_list), gate_n)
         circuit_1 = get_random_circuit(len(basic_qubit_list), gate_n)
-        result_0 = circuit_0.run(basic_qubit_list)
-        result_1 = circuit_1.run(basic_qubit_list)
+        input_matrix = qubits.get_qubit_matrix(basic_qubit_list)
+        result_0 = circuit_0.run(input_matrix)
+        result_1 = circuit_1.run(input_matrix)
         # fidelity
         f = abs(np.dot(result_0.T, result_1)) ** 2
         f_q.put(f[0, 0])

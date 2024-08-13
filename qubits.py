@@ -8,6 +8,10 @@ def get_basic(type=0):
     return get_basic_qubit_1()
 
 def get_qubit_matrix(input_list=[]):
+    """
+    input_list : [q0,q1,q2,...,qn]
+        ex : [0,1,1,0,1]
+    """
     qubit_matrix = 1
     for q_type in input_list:
         qubit = get_basic(int(q_type))
